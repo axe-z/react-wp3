@@ -1,0 +1,23 @@
+html {
+  font-size: 62.5%;
+}
+
+body {
+ background: black;
+  color: grey;
+ font-size: $m-size;
+ font-family: Avenir, Helvetica, Arial, sans-serif;
+}
+
+button {
+  cursor: pointer;
+}
+
+button:disabled {
+  cursor: default;
+}
+
+.is-active {
+  color: red;
+  font-weight: 900;
+}
