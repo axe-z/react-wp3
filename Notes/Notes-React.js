@@ -3999,10 +3999,72 @@ const montant = numeral(1000).format('$0,0.00') === '$1000,00'
 ICI NOTRE AMOUNT EST EN SOUS (5552), DONC 1 = 100 , POUR LE REMMETRE EN DOLLARS JUSTE / 100
 {numeral(amount / 100 ).format('$0,0.00')} ===  $55.52
 
+OU avec la fonction de numeral incluses
+
+{numeral(amount).divide(100).format('$0,0.00')} -
+
+
+LES FONCTIONS INCLUSENT :
+Before	Function	After
+1000	.add(100)	1100
+1100	.subtract(100)	1000
+1000	.multiply(100)	100000
+100000	.divide(100)	1000
+
+
+CREER UNE INTANCE DE NUMERAL , QUI PREND UN CHIFFRE OU UN STRING
+
+var myNumeral = numeral(1000);
+
+var value = myNumeral.value();
+// 1000
+var myNumeral2 = numeral('1,000');
+
+var value2 = myNumeral2.value();
+// 1000
 
 
 
+///////////////////////////////////////////////////////////////////////////////////////////////
+                     ///COMMENT FAIRE UN TOTAL AVEC UN SELECTOR, UNE FN POUR REDUX/////
+///////////////////////////////////////////////////////////////////////////////////////////////
+2 version, une plus courte que l autre
+si on veut le montant a partir d un array d obj, l obj a un montant dedans
 
+
+const getExpensesTotal = (expensesArr) => {
+  if (expensesArr.length === 0) {
+    return 0;
+  }
+  return expensesArr
+    .map(expense => expense.amount)
+    .reduce((accumulateur, valeurCourante) => accumulateur + valeurCourante, 0);
+};
+
+export default getExpensesTotal
+
+
+NOTRE TOTAL ICI EST EN SOUS:
+
+POUR L UTILISER DANS REACT AVEC NUMERAL:
+//Import React { connect }  getExpensesTotal getVisibleExpenses numeral
+
+const ExpensesSummary = ({expenseCount, expensesTotal}) => {
+const depenseMont = expenseCount.length !== 1 ? 'dépenses' : 'dépense'; //plusieur singulier
+const formattedExpensesTotal = numeral(expensesTotal / 100).format('$0,0.00');  //format avec numeral
+return (
+    <h1>Ici nous avons {expenseCount} {depenseMont} pour un total de {formattedExpensesTotal}</h1> //format tout
+  )
+};
+const mapStateToProps = (state) => {
+  const visibleExpenses = getVisibleExpenses(state.expenses, state.filters) //retourne ceux qui sont dans les dates.
+  return {
+    expenseCount: visibleExpenses.length,  //donne le nombre
+    expensesTotal: getExpensesTotal(visibleExpenses) //Prend le total de juste visible
+  };
+};
+
+export default connect(mapStateToProps)(ExpensesSummary);
 
 
 

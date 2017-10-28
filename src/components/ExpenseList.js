@@ -3,9 +3,9 @@ import { connect } from 'react-redux';
 import ExpenseListItem from './ExpenseListItem';
 import getVisibleExpenses from '../selectors/expensesSorting'
 
+
 const ExpenseList = (props) => (
   <div>
-    
     <h1>Expense List</h1>
     {props.expenses.map((expense) => {
       return <ExpenseListItem key={expense.id} {...expense} />;
@@ -17,8 +17,7 @@ const ExpenseList = (props) => (
 
 const mapStateToProps = state => {
   return {
-    expenses: getVisibleExpenses(state.expenses, state.filters),
-
+    expenses: getVisibleExpenses(state.expenses, state.filters)
   };
 };
 
