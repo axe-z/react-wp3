@@ -12,6 +12,7 @@ npm install -g yarn
 
 POUR COMMENCER :
 yarn init      //pour partir , exactement comme nom et fait un package.json
+npm init
 
 
                         /*** comment fonctionne yarn ***/
@@ -25,9 +26,19 @@ yarn global add live-server             //va installer live-server globallement
 *note : live-server public              //lance le serveur sur le rep public, il est real time ! good.
 
 
+normal:
+ yarn add truc
+ pour installer en devDependencies:
+ npm install --save-d truc
+ yarn add --dev truc
 
 
+pour installer seulement les node modules utile pour PROD , donc pas de dev:
+npm install --production
+yarn install --production
 
+
+yarn install ou nom install, met tout.
 
 {
   "name": "indecision-app",
@@ -90,3 +101,63 @@ yarn run dev
 
 pas rapport avec yarn mais.. MANUELLEMENT LANCER BABEL en WATCH
 babel src/app.js --out-file=public/scripts/app.js --presets=env,react --watch
+
+
+
+
+
+///////////////////////////////////////////////////////////////////////////////////////////////
+                              ///DEployer la sur HEROKU /////
+///////////////////////////////////////////////////////////////////////////////////////////////
+
+CREER NOTRE HEROKU APP, LE RESERVOIR:
+heroku create wp3-react-expensify  //on peut donner un nom !
+
+
+package -
+"start":{
+  "node":"8.1.3",
+  "start": "node server/server.js",
+  "heroku-postbuild": "yarn run build:prod"
+},
+
+
+ .gitignore  - il va les faire lui meme
+ /public/bundle.js
+ /public/bundle.js.map
+ /public/styles.css
+ /public/styles.css.map
+
+
+ajuster ses dependencies :
+y a tous les trucs de testing qui ne devrait pas etre sur heroku,
+de meme que live-ser et webpack dev server.
+
+pour installer en devDependencies:
+npm install --save-d chalk
+yarn add --dev chalk
+
+donc tout ce qui n est pas necessaire le mettre :
+"dependencies": {
+...
+"uuid": "^3.1.0",
+"validator": "^9.0.0",
+"webpack": "^3.7.1"
+  },
+"devDependencies": {
+"live-server": "^1.2.0",
+"enzyme": "2.9.1",
+"enzyme-to-json": "1.5.1",
+"react-test-renderer": "15.6.1",
+"webpack-dev-server": "^2.9.2",
+"jest": "^21.2.1"
+  }
+}
+
+apres avoir fait notre github a jour
+
+ git push heroku master
+
+ heroku open
+
+-- git rm package-lock.json si jamais on veut enlever un fichier

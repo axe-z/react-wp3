@@ -16,7 +16,7 @@ module.exports = (env) => {
   return {
     entry: './src/app.js',
     output: {
-      path: path.join(__dirname, 'public'),
+      path: path.join(__dirname, 'public', 'dist'),
       filename: 'bundle.js'
     },
     module: {
@@ -52,7 +52,8 @@ module.exports = (env) => {
       contentBase: path.join(__dirname, 'public'),
       //compress: true,     //MINIFY LE CODE, PAS BESOIN POUR DEV.
       historyApiFallback: true,  //CECI DIRA QU ON S OCCUPE DU ROUTING, ET DE RETOURNE INDEX.HTML A CHAQUE 404
-      port: 8080            //PORT PAR DEFAUT
+      port: 8080,            //PORT PAR DEFAUT
+      publicPath: '/dist/'
     },
     plugins: [
       CSSExtract,

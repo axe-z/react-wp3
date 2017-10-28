@@ -3891,7 +3891,7 @@ app.listen(port, () => {
                               ///DEployer la sur HEROKU /////
 ///////////////////////////////////////////////////////////////////////////////////////////////
 
-
+CREER NOTRE HEROKU APP, LE RESERVOIR:
 heroku create wp3-react-expensify  //on peut donner un nom !
 
 
@@ -3910,11 +3910,74 @@ package -
  /public/styles.css.map
 
 
+ajuster ses dependencies :
+y a tous les trucs de testing qui ne devrait pas etre sur heroku,
+de meme que live-ser et webpack dev server.
+
+pour installer en devDependencies:
+npm install --save-d chalk
+yarn add --dev chalk
+
+donc tout ce qui n est pas necessaire le mettre :
+"dependencies": {
+...
+"uuid": "^3.1.0",
+"validator": "^9.0.0",
+"webpack": "^3.7.1"
+  },
+"devDependencies": {
+"live-server": "^1.2.0",
+"enzyme": "2.9.1",
+"enzyme-to-json": "1.5.1",
+"react-test-renderer": "15.6.1",
+"webpack-dev-server": "^2.9.2",
+"jest": "^21.2.1"
+  }
+}
+
+apres avoir fait notre github a jour
+
  git push heroku master
 
  heroku open
 
-git rm package-lock.json
+-- git rm package-lock.json si jamais on veut enlever un fichier
+
+
+
+
+
+NETTOYER LES OUTPUTS AVEC /DIST:
+<link rel="stylesheet" href="./dist/styles.css">
+<script src="/dist/bundle.js"></script>
+
+pour y arriver :
+module.exports = (env) => {
+...
+  return {
+    entry: './src/app.js',
+    output: {
+      path: path.join(__dirname, 'public', 'dist'),
+...
+devServer: {
+  contentBase: path.join(__dirname, 'public'),
+  //compress: true,     //MINIFY LE CODE, PAS BESOIN POUR DEV.
+  historyApiFallback: true,  //CECI DIRA QU ON S OCCUPE DU ROUTING, ET DE RETOURNE INDEX.HTML A CHAQUE 404
+  port: 8080            //PORT PAR DEFAUT
+  publicPath: '/dist/'
+},
+
+2- deleter les fichier de public sauf index.html
+
+3- yarn run build:prod
+va  construire dist/ fichiers et les maps
+
+4-ajuster le .gitignore
+/node_modules
+/public/dist/
+/Notes/
+
+
 ///////////////////////////////////////////////////////////////////////////////////////////////
                   ////CONNECT  ECRIRE SUR LE STORE////
 ///////////////////////////////////////////////////////////////////////////////////////////////
