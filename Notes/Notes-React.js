@@ -3978,6 +3978,35 @@ va  construire dist/ fichiers et les maps
 /Notes/
 
 
+
+
+
+///////////////////////////////////////////////////////////////////////////////////////////////
+                              ///Formater de l argent et moment/////
+///////////////////////////////////////////////////////////////////////////////////////////////
+http://numeraljs.com
+<script src="//cdnjs.cloudflare.com/ajax/libs/numeral.js/2.0.6/numeral.min.js"></script>
+npm install numeral --save
+yarn add numeral
+
+
+import numeral from 'numeral'
+
+
+EXEMPLE:
+const montant = numeral(1000).format('$0,0.00') === '$1000,00'
+
+ICI NOTRE AMOUNT EST EN SOUS (5552), DONC 1 = 100 , POUR LE REMMETRE EN DOLLARS JUSTE / 100
+{numeral(amount / 100 ).format('$0,0.00')} ===  $55.52
+
+
+
+
+
+
+
+
+
 ///////////////////////////////////////////////////////////////////////////////////////////////
                   ////CONNECT  ECRIRE SUR LE STORE////
 ///////////////////////////////////////////////////////////////////////////////////////////////
