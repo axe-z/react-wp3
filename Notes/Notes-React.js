@@ -4068,19 +4068,81 @@ export default connect(mapStateToProps)(ExpensesSummary);
 
 
 
+ ///////////////////////////////////////////////////////////////////////////////////////////////
+                               ///Ajout de firebase /////
+ ///////////////////////////////////////////////////////////////////////////////////////////////
+
+
+ https://firebase.google.com/docs/reference/js/?authuser=0
+
+ npm install --save firebase
+ yarn add firebase
+ import firebase from firebase;
+
+ https://firebase.google.com
+
+
+ 1 - creer un projet, donner un nom , ensuite aller au dashboard
+ 1b - cliquer premier pas , si on voit pas les tabs donnees - regles - sauvegardes et utilisation
+ 2 - changer les regles , et laisser ca tres soft pour commencer, sans auth:
+ par defaut :
+ {
+   "rules": {
+     ".read": "auth != null",
+     ".write": "auth != null"
+   }
+ }
+ on veut ca pour commencer:
+ {
+   "rules": {
+     ".read": true,
+     ".write": true
+   }
+ }
+ ensuite cliquer sur publier
+
+ 3 - retourner a overview et cliquer sur "Ajouter Firebase à votre application Web"  - dernier bouton
+ 4- copier les code d autentification.
+ 5- creer un folder et un fichier pour prendre cette config. ici dans "src/firebase/firebase.js"
+
+ 6 - on doit importer en * as firebase , donc ca devient firebase.truc
+
+ import * as firebase from 'firebase';
+
+
+     var config = {
+       apiKey: "AIzaSyD0MeRik9qYGX0...",
+       authDomain: "axe-z-budget.firebaseapp.com",
+       databaseURL: "https://axe-z-budget.firebaseio.com",
+       projectId: "axe-z-budget",
+       storageBucket: "axe-z-budget.appspot.com",
+       messagingSenderId: "3952..."
+     };
+
+     firebase.initializeApp(config); //ce qui initilise le tout
+
+
+
+ 7- faire un test de connexion :
+ firebase.database().ref().set({
+   nom: 'Axe-Z'
+ });
+
+
+ 8- pour le rouler notre test et config, on va l apporter dans notre app.js ou index.js selon le projet..
+
+ import './firebase/firebase.js' //pour avoir acces au fichier
+
+ lancer le server qu on a ( dev-server de webpack, aller au port 8080 ou 3000)
+
+ 9- Pour confirmer si ca fonctionne , retourner sur le site de firebase, dans "database" on doit voir:
+
+     axe-z-budget
+     |-- nom: "Axe-Z"
+
+ si oui, bravo, ca fonctionne.
+
 
 ///////////////////////////////////////////////////////////////////////////////////////////////
-                  ////CONNECT  ECRIRE SUR LE STORE////
+                              ///Firebase avec REACT ET REDUX /////
 ///////////////////////////////////////////////////////////////////////////////////////////////
-CONNECT
-connect([mapStateToProps], [mapDispatchToProps], [mergeProps], [options])
-
- mapDispatchToProps: DONNE ACCES AUX ACTIONS DE REDUX
- Ce qui est retourner par cette fonction ira sur le this.props
- de ce component:  props.filters
-
-function mapDispatchToProps(dispatch){
-  return  bindActionCreators({
-
-  }, dispatch) //dispatch en 2ieme arg
-}
