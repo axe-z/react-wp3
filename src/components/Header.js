@@ -28,10 +28,8 @@ const Header = ({startLogout}) => (
   <header>
     <h1>Expensify</h1>
     <nav>
-      <NavLink to="/" activeClassName="is-active" exact={true}   style={style}>ACCUEIL</NavLink>
+      <NavLink to="/dashboard" activeClassName="is-active" style={style}>DASHBOARD</NavLink>
       <NavLink to="/create" activeClassName="is-active"  style={style}>AJOUT DE DEPENSES</NavLink>
-      {/* <NavLink to="/edit" activeClassName="is-active">EDIT</NavLink> */}
-      <NavLink to="/help" activeClassName="is-active" style={style}>AIDE</NavLink>
       <button style={{...style , ...style2 }} onClick={startLogout}>out</button>
     </nav>
   </header>

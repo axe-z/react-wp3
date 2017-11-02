@@ -4168,3 +4168,632 @@ export default connect(mapStateToProps)(ExpensesSummary);
 ///////////////////////////////////////////////////////////////////////////////////////////////
                               ///Firebase avec REACT ET REDUX /////
 ///////////////////////////////////////////////////////////////////////////////////////////////
+
+
+
+
+
+
+///////////////////////////////////////////////////////////////////////////////////////////////
+                              ///Authentification/////
+///////////////////////////////////////////////////////////////////////////////////////////////
+//project-395234716581 //firebase m a donné ca , j sais pas c est quoi
+FAIRE UN LOGIN FIRABASE REACT-REDUX
+
+1- sur le site de firabase , activer l authentification
+dans authentification et on va prendre google pour l instant sans ajouter d option
+
+2- Dans notre fichier firebase.js - lui de config des key - on va ajouter :
+  const googleAuthProvider = new firebase.auth.GoogleAuthProvider();
+
+ET exporter :   export { firebase , googleAuthProvider, db as default };
+
+
+3- les docs :  https://firebase.google.com/docs/reference/js/?authuser=0#firebase.auth
+ pour google auth : https://firebase.google.com/docs/reference/js/firebase.auth.GoogleAuthProvider?authuser=0
+
+
+4- IMPORTER dans notre main js - app.js , pour un test : import {firebase} from './firebase/firebase.js';
+
+
+5- firebase.auth().onAuthStateChanged((user) => {  //ici on a  un event qui lance selon l action login
+ if(user) {
+    console.log('log in', /*user*/) ///user est plein d affaire. position , nom email ...etc
+ } else {
+    console.log('out')
+ }
+});
+
+
+6 DANS NOS ACTIONS : auth.js
+import { firebase, googleAuthProvider } from '../firebase/firebase.js';
+
+export const startLogin = () => {
+  return (dispatch) => {
+    return firebase.auth().signInWithPopup(googleAuthProvider)  //va faire un popup
+  }
+}
+
+
+7- DANS NOTRE COMPONENT  LoginPage.js :
+
+STARTLOGIN , NOTRE ACTION, PASSÉ DANS MAPDISPATCHTOPROPS ,
+DEVIENT UN FN DISPO SUR PROPS, DONC DECONSTRUIRE
+
+import React, {Component} from "react";
+import { connect } from 'react-redux';
+import { startLogin } from '../actions/auth.js';
+
+const LoginPage = ({startLogin}) => {
+ return (
+    <div>
+      <button style={style}
+        onClick={ startLogin }>LOGIN</button>
+    </div>
+  )
+};
+
+const mapDispatchToProps = (dispatch) => {
+  return {
+    startLogin: () => dispatch(startLogin())  //il faut lancer
+  }
+};
+
+export default connect(undefined, mapDispatchToProps)(LoginPage);
+
+
+8- lancer le login , on devrait voir 'log in' dans la console,
+si regarde sur le site de firebase on a maintenant:
+
+benoitlafrance35@gmail.com
+1 nov.2017  --date de creation
+1 nov.2017  --date de derniere connexion
+et le id du user BAjf1AkeyCgLmjpkE...
+
+SI ON REFRESH , ON RESTE LOG IN , SI ON FERME LE BROWSER, ON RESTE LOG IN .
+
+
+
+
+///////////////////////////////////////////////////////////////////////////////////////////////
+                              ///LOG OUT /////
+///////////////////////////////////////////////////////////////////////////////////////////////
+IL FAUT AVOIR AVANT TOUT FAIT TOUT NOTRE LOG IN...
+AVANT TOUT , L ACTION DANS AUTH.JS
+
+export const startLogout = () => {
+  return () => {
+    return firebase.auth().signOut(); //methode qui log out
+  }
+}
+
+
+DANS NOTRE HEADER.js SEMBLE LA BONNE PLACE :
+...
+import { connect } from 'react-redux';
+import { startLogout } from '../actions/auth.js';
+
+const Header = ({startLogout}) => (
+  <header>
+      <button  onClick={startLogout}>LOG OUT</button>
+  </header>
+);
+
+const mapDispatchToProps = (dispatch) => {
+  return {
+    startLogout: () => dispatch(startLogout())
+  }
+};
+
+export default connect(undefined, mapDispatchToProps)(Header);
+
+
+CECI NOUS LOG OUT
+
+
+
+
+///////////////////////////////////////////////////////////////////////////////////////////////
+                              ///HISTORY  ET REDIRIGER AVEC UN LOG IN OU OUT /////
+///////////////////////////////////////////////////////////////////////////////////////////////
+
+install:
+npm install --save history
+
+
+import createHistory from 'history/createBrowserHistory'
+
+
+UTILISATION USUELLE :
+import createHistory from 'history/createBrowserHistory'
+
+CREER UN INSTANCE :
+const history = createHistory()
+
+AVOIR LA LOCATION ACTUELLE :
+const location = history.location
+
+EVENT QUI REGARDE LES CHANGEMENTS D URL :
+const unlisten = history.listen((location, action) => {
+  // location is an object like window.location
+  console.log(action, location.pathname, location.state)
+})
+
+ON UTILISE PUSH, REPLACE ET GO :
+history.push('/home', { some: 'state' })
+
+ON ARRETE L EVENT :
+unlisten()
+
+
+
+
+DONC MAINTENANT AVEC FIREBASE:
+
+
+AppRouter.js
+
+import createHistory from 'history/createBrowserHistory'
+import { Router, Route, Switch, Link, NavLink } from 'react-router-dom';  //CHANGE POUR ROUTER
+
+ON CREER ET EXPORT NOTRE INSTANCE
+export const history = createHistory()
+
+ON PASSE A ROUTER -
+
+<BrowserRouter> UTILISE UN AUTRE TRUC , NOUS ON VEUT HISTORY DONC :   </BrowserRouter>
+<Router history={history}>   ON REMPLACE PAR ROUTER ET PLACE HISTORY DEDANS </Router>
+
+
+APP.JS :
+ON IMPORTE NOTRE INSTANCE
+import AppRouter, { history } from './routers/AppRouter';
+
+
+///systeme
+let hasRendered = false ;
+
+const renderApp = () => {
+  if(!hasRendered){
+    ReactDOM.render(wrapProvider, document.getElementById('app'));
+    hasRendered = true;
+  }
+};
+
+
+//montre loading
+ReactDOM.render(<p>Telechargement...</p>, document.getElementById('app'));
+
+
+//EVENT LISTNER POUR LOG IN
+firebase.auth().onAuthStateChanged((user) => {
+ if(user) {
+///FETCH DU DATA
+   store.dispatch(startSetExpenses()).then(() => {
+     //RENDER LE JSX
+    renderApp()
+    if(history.location.pathname === '/'){ //si sur '/' va au dashboard
+      history.push('/dashboard'); //le push
+    }
+    });
+ } else {
+    renderApp() //MONTRE LAPP ( LE HEADER ) AU '/'
+    history.push('/');
+ }
+});
+
+///////////////////////////////////////////////////////////////////////////////////////////////
+                              ////SE FAIRE UN DISPATCH LOGIN LOGOUT////
+///////////////////////////////////////////////////////////////////////////////////////////////
+
+
+ONAUTHSTATECHANGED, RETOURNE LE USER ET USER,
+UID EST LE ID DU USER CREER PAR LE AUTH , ON VA STOCKER CA DANS NOTRE DB
+
+   console.log(user.uid) // BAjf1AkeyCgLjpkEWBjB.hG..
+
+ON VA STORER LE USER RETOURNÉ PAR LE AUTH :
+
+const authReducerDefaultState = {};
+
+const authReducer = (state = authReducerDefaultState, action) => {
+ switch (action.type) {
+   case  "LOGIN":
+   return {
+     uid: action.uid
+   }
+   case "LOGOUT":
+   return {}
+   default:
+     return state
+ }
+};
+
+export default authReducer;
+
+
+
+export const login = ( uid ) => ({
+  type: "LOGIN",
+  uid
+})
+
+export const logout = ( ) => ({
+  type: "LOGIN"
+})
+
+
+AJOUTER A COMBINE REDUCER
+
+
+DANS NOTRE APP.JS , DANS NOTRE EVENTLISTNER :
+
+import { login, logout } from './actions/auth';
+
+firebase.auth().onAuthStateChanged((user) => {
+ if(user) {
+   console.log(user.uid)
+   store.dispatch(login(user.uid))
+
+
+   ///////////////////////////////////////////////////////////////////////////////////////////////
+                                 ////BARRER LE POUVOIR DE BYPASSER LE LOGIN////
+   ///////////////////////////////////////////////////////////////////////////////////////////////
+
+ ON VA SE FAIRE UN COMPONENT : PRIVATEROUTE
+ PRIVATEROUTE va agir en generateur de Route , va prendre tous les props recu ( path exact, component)
+ et va generer une route seulement si le user a un id, autrement rediriger vers le login
+
+
+ import PrivateRoute from './PrivateRoute.js'
+ const AppRouter = () => (
+   <Router history={history}>
+     <div>
+       <Header />
+       <Switch>
+         <Route path="/" exact={true} component={LoginPage} />
+         <PrivateRoute path="/dashboard" component={ExpenseDashboardPage} />
+         <PrivateRoute path="/create" component={AddExpensePage} />
+         <PrivateRoute path="/edit/:id" component={EditExpensePage} />
+...
+       </Switch>
+     </div>
+   </Router>
+ )
+
+
+PRIVATEROUTE.js
+pas si complexe , mais etrange patern
+en gros, on prend une route et on met un wrapper autour, ce wrapper, retourne la route
+avec comme props , tout ce qui etait passé dans la route qu il wrap. simple hein ?
+
+bon en wrappant la route on peut y mettre des condition, tel est il logguer ? montre le header ou non ?
+
+
+UTILISE CONNECT POUR AVOIR DU STORE LE ID OU NON
+PREND DE REACT-ROUTER-DOM ROUTE , POUR CREER LES CHEMIN ,
+ET REDIRECT POUR CEUX SANS ID
+
+//const PrivateRoute = ({isAuthenticated, component: Component , ...props})
+CE CODE ,PREND EN PREMIER LE BOOL RETOURNER DE  isAuthenticated DECONSTRUIT LE
+RESTE , ET PREND component : Component on doit renommer a Component bien qu on le recois en props en minuscule , pour utiliser Component il doit etre en maj,  et LE ...leReste (tous les autres truc qui pourrait y etre) QUI SONT DANS APPROUTER (path):
+
+// <PrivateRoute path="/dashboard" component={ExpenseDashboardPage} />
+
+
+import React from "react";
+import { connect } from 'react-redux';
+ import {  Route, Redirect } from 'react-router-dom';
+
+
+const PrivateRoute = ({isAuthenticated, component: Component , ...leReste}) => {
+ return (
+    <Route {...leReste} component={(props) => (
+      isAuthenticated ? (
+        <Component {...leReste} />
+      ) : (
+        <Redirect to="/" />
+       )
+    )}/>
+  )
+};
+
+const mapStateToProps = (state) => {
+  return {
+    isAuthenticated: state.auth.uid ? true : false       //OU !!state.auth.uid
+  }
+};
+
+export default connect(mapStateToProps)(PrivateRoute);
+
+
+
+DONC SI LOGGUER , ON PEUT ALLER DANS LES ROUTES  path="/create" path="/edit/:id",
+mais si logout, c est Link nous ramene a '/'
+
+
+
+///////////////////////////////////////////////////////////////////////////////////////////////
+                           METTRE LE HEADER SEULEMENT SI..
+///////////////////////////////////////////////////////////////////////////////////////////////
+on va le sortir de cet endroit :
+
+const AppRouter = () => (
+  <Router history={history}>
+    <div>
+
+      <Switch>
+        <Route path="/" exact={true} component={LoginPage} />
+        <PrivateRoute path="/dashboard" component={ExpenseDashboardPage} />
+        <PrivateRoute path="/create" component={AddExpensePage} />
+        <PrivateRoute path="/edit/:id" component={EditExpensePage} />
+        <Route path="/help" component={HelpPage} />
+        <Route component={Oups404} />
+      </Switch>
+    </div>
+  </Router>
+)
+
+ET L INJECTÉ DANS LE COMPONENT QU EN ONT BESOIN
+Il faut un wrapper div , 2 components...
+
+import Header from '../components/Header.js';
+const PrivateRoute = ({isAuthenticated, component: Component , ...reste}) => {
+ return (
+    <Route {...reste} component={(props) => (
+      isAuthenticated ? (
+        <div>
+           <Header />
+              <Component {...props} />
+         </div>
+      ) : (
+        <Redirect to="/" />
+       )
+    )}/>
+  )
+};
+
+
+
+///////////////////////////////////////////////////////////////////////////////////////////////
+                             Pas arriver sur login au depart les routes Public ////
+///////////////////////////////////////////////////////////////////////////////////////////////
+EN FAIT TOUT L INVERSE DES ROUTES PRIVEES
+
+<PublicRoute path="/" exact={true} component={LoginPage} />
+<PublicRoute path="/help" component={HelpPage} />
+<PublicRoute component={Oups404} />
+
+
+import React from "react";
+import { connect } from 'react-redux';
+ import {  Route, Redirect } from 'react-router-dom';
+import Header from '../components/Header.js';
+
+{/* <PrivateRoute path="/edit/:id" component={EditExpensePage} /> */}
+
+const PrivateRoute = ({isAuthenticated, component: Component , ...reste}) => {
+ return (
+    <Route {...reste} component={(props) => (
+      isAuthenticated ? (
+        <div>
+           <Header />
+            <Component {...props} />
+         </div>
+      ) : (
+        <Redirect to="/" />
+       )
+    )}/>
+  )
+};
+
+const mapStateToProps = (state) => {
+  return {
+    isAuthenticated:  state.auth.uid ? true : false       //OU !!state.auth.uid
+  }
+};
+
+export default connect(mapStateToProps)(PublicRoute);
+
+
+
+
+
+
+///////////////////////////////////////////////////////////////////////////////////////////////
+                              ///SEPARER LA DB PAR USERS/////
+///////////////////////////////////////////////////////////////////////////////////////////////
+
+DANS CE PROJET :
+
+LE STORE A EXPENSES AUTH ET FILTER ,
+
+la db elle
+db:{
+  expenses : {
+    user ..
+  }
+}
+
+NOUS ON VEUT APPLATIR D UN LEVEL :
+db:{
+    user {
+      id: 'gregregreggsdg',
+      expenses : { }
+    }
+}
+
+
+REFAIRE NOS ACTIONS:
+
+THUNK DONNE ACCES AU STORE :
+return (dispatch, getState) => {
+  const uid = getState().auth.uid    DONC ON PEUT ICI PRENDRE LE ID DU USER LOGGER
+
+
+  LA FN:
+
+export const startAddExpense  = (expenseData = {}) => {  //ICI ON PASSERA LES DEFAULTS DE ADDEXPENSE
+
+  return (dispatch, getState) => {
+
+    const uid = getState().auth.uid //PRENDRE LE ID DU USER LOGGER
+    const {description = '', note = '', amount = 0, createdAt = 0 } = expenseData;
+    const expense = {description, note, amount, createdAt}; //ceci contien les defaults on les prend des const fait
+
+  return db.ref( `users/${uid}/expenses` ).push(expense)
+    .then((data) => {
+      dispatch(addExpense({
+        id: data.key,     //ID DE FIREBASE
+        ...expense        //le reste des key value
+      }))
+    }).catch((e) => {
+      console.log(e)
+    });
+  };
+};
+
+
+db.ref( `users/${uid}/expenses` )
+VA CREER LE PATH ET METTRE LE UID EN PLACE , LE RESTE IRA DANS EXPENSES SOUS
+
+donc :
+users
+ BAjf1AkeyCgLmjpkEWBjB6QhGvn2  //uid
+  expenses  //obj expenses
+    -KxwvYXQkZhaENHHH-fd  //id de la depense
+      amount: "..."
+      createdAt: "..."
+      description: "..."
+      note: "..."
+
+
+MAINTENANT ON DOIT AJUSTER CE QUI APPARAIT A L ECRAN le path du DATA a changé :
+export const startSetExpenses = () => {
+  return (dispatch, getState) => {
+
+    const uid = getState().auth.uid //PRENDRE LE ID DU USER LOGGER
+    return db
+
+      .ref(`users/${uid}/expenses`) // DONNER LE BON PATH M SELON LE USER UID
+      ... RESTE EST LA MEME CHOSE .
+
+
+OU EDIT MEME CHOSE :
+export const startEditExpense = (id, updates) => {
+  return (dispatch, getState) => {
+    const uid = getState().auth.uid
+    return db
+      .ref(`users/${uid}/expenses/${id}`)
+      ... RESTE EST LA MEME CHOSE .
+
+
+OU REMOVE POUR FINIR LE CRUD :
+export const startRemoveExpense = (id) => {
+  return (dispatch, getState) => {
+    const uid = getState().auth.uid
+    db.ref(`users/${uid}/expenses/${id}`).remove()
+      ... RESTE EST LA MEME CHOSE .
+
+
+
+
+///////////////////////////////////////////////////////////////////////////////////////////////
+                 NOTRE DB EST TOUJOURS EN READ AND WRITE : TRUE,   CHANGER CA/////
+///////////////////////////////////////////////////////////////////////////////////////////////
+AJOUTER DE LA SECURITÉ A NOTRE DB :
+
+les docs : https://firebase.google.com/docs/database/security/
+
+LES REGLES A METTRE DANS NOTRE CAS .
+{
+  "rules": {
+    ".read": false,
+    ".write": false,
+      "users": {     //est le nom de notre arbre
+        "$user_id": {   //id = uid notre uid est nesté , donc on suit la forme de notre arbre de DB
+          ".read": "$user_id === auth.uid", //si les deux sont le meme
+   			  ".write": "$user_id === auth.uid"
+        }
+      }
+  }
+}
+
+tester NOS REGLES AVEC LE SIMULATEUR
+
+ON DOIT TESTER AVEC DANS LE CHAMP URL METTRE users/et le id qu il nous donne
+1- click sur authentifié
+2- /users/7f6368f4-2aba-49c8-8a1... le id qu il donne
+3- executer
+
+
+
+
+///////////////////////////////////////////////////////////////////////////////////////////////
+                             FAIRE DE LA VALIDATION SUR FIREBASE
+///////////////////////////////////////////////////////////////////////////////////////////////
+docs :
+https://firebase.google.com/docs/reference/security/database/
+
+ON EN FAIT DANS L APP MAIS FIREBASE AUSSI PEUT LE FAIRE ,
+ET EN COMBO, C EST BEST.
+
+$other: ON DIT AU SYSTEME QUE SI CE NEST PAS UNE EXPENSES, ON ECRIT JUSTE PAS,
+ON RECOIUT QUE DES EXPENSES , OTHER , PREND TOUT LE RESTE.
+
+.validate: PERMET DE RENTRER DES CONDITION OU BOOL, POUR LA SECTION DE LA DB DANS LAQUEL IL EST
+
+ newData: verifie ce qui entre et permet d y associer un pacquet de function qui valide le typeof , length, etc..
+
+hasChildren(['description', 'note', 'createdAt', 'amount']): le data qu on recoit doit avoir ca ,ceci est un function, il est imperatif de mettre des SINGLE QUOTE ' ' dans l array. On peut le mettre parce que redux met des value de default.
+
+
+
+RESULTAT :
+
+ {
+   "rules": {
+     ".read": false,
+     ".write": false,
+       "users": {
+         "$user_id": {
+           ".read": "$user_id === auth.uid",
+    			 ".write": "$user_id === auth.uid",
+           "expenses": {
+             "$expense_id": {
+               ".validate": "newData.hasChildren(['description', 'note', 'createdAt', 'amount'])",
+                 "description":{
+                   ".validate": "newData.isString() && newData.val().length > 0"
+                 },
+                 "note":{
+                   ".validate": "newData.isString()"
+                 },
+                 "createdAt": {
+                   ".validate": "newData.isNumber()"
+                 },
+                 "amount": {
+                   ".validate": "newData.isNumber()"
+                 },
+                 "$other": {
+                  ".validate": false
+                 }
+             }
+           },
+             "$other": {
+               ".validate": false
+             }
+         }
+       }
+   }
+ }
+
+SIMULATEUR :
+/users/7f6368f4-2aba-49c8-8a13-46ab7..
+
+ENSUITE PASSER LE JSON , DE FAKE DATA :
+{
+"description": "test",
+"note": "",
+"amount": 0,
+"createdAt": 123
+}

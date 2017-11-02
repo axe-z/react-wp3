@@ -2,17 +2,7 @@
 import uuid from 'uuid';
 import db from '../firebase/firebase';
 
-/*** action creator EXPENSES ***/
-// export const addExpense = ({description = '', note = '', amount = 0, createdAt = 0 }) => ({
-//   type: "ADD_EXPENSE",
-//   expense: {
-//     id: uuid(),
-//     description,
-//     note,
-//     amount,
-//     createdAt,
-//   }
-// });
+
 
 //DEVIENT
 export const addExpense = (expense) => ({
@@ -22,10 +12,11 @@ export const addExpense = (expense) => ({
 
 //thunk
 export const startAddExpense  = (expenseData = {}) => {  //ICI ON PASSERA LES DEFAULTS DE ADDEXPENSE
-  return (dispatch) => {
+  return (dispatch, getState) => {
+    const uid = getState().auth.uid;
     const {description = '', note = '', amount = 0, createdAt = 0 } = expenseData;
     const expense = {description, note, amount, createdAt}; //ceci contien les defaults on les prend des const fait
-  return db.ref('expenses').push(expense)
+  return db.ref( `users/${uid}/expenses` ).push(expense)
     .then((data) => {
       dispatch(addExpense({
         id: data.key,     //ID DE FIREBASE
@@ -46,8 +37,9 @@ export const removeExpense = (id) => ({
 });
 
 export const startRemoveExpense = (id) => {
-  return (dispatch) => {
-    db.ref(`expenses/${id}`).remove()
+  return (dispatch, getState) => {
+    const uid = getState().auth.uid
+    db.ref(`users/${uid}/expenses/${id}`).remove()
     .then(() => {
        return dispatch(removeExpense(id))
     }).catch((e) => {
@@ -66,15 +58,10 @@ export const editExpense = (id, updates) => ({
 });
 
 export const startEditExpense = (id, updates) => {
-  return dispatch => {
-    //   db.ref(`expenses/${id}`).set({
-    //     ...updates
-    //   });
-    //   dispatch(editExpense(id, updates))
-    // };
-
+  return (dispatch, getState) => {
+    const uid = getState().auth.uid
     return db
-      .ref(`expenses/${id}`)
+      .ref(`users/${uid}/expenses/${id}`)
       .update({
         ...updates
       })
@@ -90,9 +77,10 @@ export const setExpenses = (expenses) => ({
 
 
 export const startSetExpenses = () => {
-  return dispatch => {
+  return (dispatch, getState) => {
+    const uid = getState().auth.uid //PRENDRE LE ID DU USER LOGGER
     return db
-      .ref('expenses') // donne un then l autre bord
+      .ref(`users/${uid}/expenses`) // donne un then l autre bord
       .once('value')
       .then(data => {
         const expenses = []; //on se creer un array
