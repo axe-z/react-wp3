@@ -50,12 +50,17 @@ module.exports = (env) => {
         }
       ]
     },
-    devtool: isProduction ? 'source-map' : 'cheap-module-eval-source-map',
+    // devtool: isProduction ? 'source-map' : 'cheap-module-eval-source-map',
+    // devServer: {
+    //   contentBase: path.join(__dirname, 'public'),
+    //   //compress: true,     //MINIFY LE CODE, PAS BESOIN POUR DEV.
+    //   historyApiFallback: true,  //CECI DIRA QU ON S OCCUPE DU ROUTING, ET DE RETOURNE INDEX.HTML A CHAQUE 404
+    //   port: 8080,            //PORT PAR DEFAUT
+    //   publicPath: '/dist/'
+    devtool: isProduction ? 'source-map' : 'inline-source-map',
     devServer: {
       contentBase: path.join(__dirname, 'public'),
-      //compress: true,     //MINIFY LE CODE, PAS BESOIN POUR DEV.
-      historyApiFallback: true,  //CECI DIRA QU ON S OCCUPE DU ROUTING, ET DE RETOURNE INDEX.HTML A CHAQUE 404
-      port: 8080,            //PORT PAR DEFAUT
+      historyApiFallback: true,
       publicPath: '/dist/'
     },
     plugins: [

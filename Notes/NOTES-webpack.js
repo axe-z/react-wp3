@@ -513,7 +513,7 @@ plugins: [
 
 
 4- Maintenant qu on a un fichier css, on doit l ajouter dans notre HTML
-  <link rel="stylesheet" href="./styles.css"  /> (pas mettre le / c est pour fermer et pas fucker les notes)
+  <link rel="stylesheet" href="/styles.css"  /> (pas mettre le / c est pour fermer et pas fucker les notes)
 
 /********************  maniere dite sur npm (pas celle qu on prend mais marche )   ***********************/
 1- une maniere :
@@ -529,6 +529,12 @@ plugins: [
     new ExtractTextPlugin("styles.css"),
   ]
 3- ajout dnas html
-  <link rel="stylesheet" href="./styles.css" />(pas mettre le / c est pour fermer et pas fucker les notes)
+  <link rel="stylesheet" href="/styles.css" />(pas mettre le / c est pour fermer et pas fucker les notes)
   mais on aura p-e des trouble avec source-map de notre css
+
+
+!!!! important !!!!!!
+
+  <link rel="stylesheet" href="/styles.css" />  METTRE /REP/TRUC.CSS PAS ./REP/TRUC.CSS , SINON LE CSS FONCTIONNERRA PAS BIEN SI ON RELOAD NON PAS DE LA PAGE PRINCIPALE , MAID AILLEURS DANS L APP
+  
 /********************  maniere dite sur npm (pas celle qu on prend mais marche )   ***********************/

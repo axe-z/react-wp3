@@ -288,6 +288,9 @@ store.dispatch(incrementCount(10)); //ajoute 10
                               ///REDUCERS/////
 ///////////////////////////////////////////////////////////////////////////////////////////////
 
+
+L IMPORTANT DE COMPRENDRE , ON ON VEUT SIMPLEMENT RETOURNER DANS NOS CASE, CE QU ON VEUT COMME STATE , CE
+SANS PRENDRE LE STATE MODIFIER POUR LE FAIRE . CE QU ON RETOURNE DEVIENT LE STATE.
 AU LIEU DE METTRE CA DNAS CREATESTORE, ON VA TRAITER NOS ACTION DNAS CECI: REDUCER .
 
 Le reducer est entre l action et le store, et ecoute pour chaque dispatch ,
@@ -1178,7 +1181,61 @@ export const startAddExpense  = (expenseData = {}) => {  // METTRE UN DEFAUT VID
     const {description = '', note = '', amount = 0, createdAt = 0 } = expenseData; //DEFAUT
     const expense = {description, note, amount, createdAt}; //FAIRE UN OBJ AVEC NOS DEFAUTS
 
-  return db.ref('expenses').push(expense) //PASSE L OBJECT DE DEFAUT //RETURN FACULTATIF 
+  return db.ref('expenses').push(expense) //PASSE L OBJECT DE DEFAUT //RETURN FACULTATIF
+    .then((ref) => {
+      dispatch(addExpense({
+        id: ref.key,
+        ...expense //le reste des key value
+      }))
+    }).catch((e) => {
+      console.log(e)
+    });
+  };
+};
+
+DONC ON POURRA MAINTENANT SIMPLIFIER ADEXPENSE, IL N AURA PLUS BESOIN DE CREER SES DEFAULT.
+ON NE PRENDRA PLUS LE ID DU UUID, MAIS LUI DE FIREBASE .
+
+export const addExpense = (expense) => ({
+  type: "ADD_EXPENSE",
+  expense : expense
+});
+
+
+DONC NOTRE CALL DU THINK VERS L ACTION USUEL ,
+ET ON DOIT CHANGER LE NOM DE L ACTION APPELE DANS REACT
+PASSER DE addExpense A startAddExpense :
+
+
+
+
+
+///////////////////////////////////////////////////////////////////////////////////////////////
+                              ///Firebase avec  REDUX /////
+///////////////////////////////////////////////////////////////////////////////////////////////
+import db from '../firebase/firebase';
+
+Dans nos actions :
+
+export const addExpense = ({description = '', note = '', amount = 0, createdAt = 0 }) => ({
+  type: "ADD_EXPENSE",
+  expense: {
+    id: uuid(),
+    description,
+    note,
+    amount,
+    createdAt,
+  }
+});
+
+CETTE ACTION CREAIT LES DEFAUT POUR LE STORE, MAIS MAINTENANT UN VEUT LE DEFAULT POUR FIREBASE
+
+export const startAddExpense  = (expenseData = {}) => {  // METTRE UN DEFAUT VIDE SI JAMAIS
+  return (dispatch) => {
+    const {description = '', note = '', amount = 0, createdAt = 0 } = expenseData; //DEFAUT
+    const expense = {description, note, amount, createdAt}; //FAIRE UN OBJ AVEC NOS DEFAUTS
+
+  return db.ref('expenses').push(expense) //PASSE L OBJECT DE DEFAUT //RETURN FACULTATIF
     .then((ref) => {
       dispatch(addExpense({
         id: ref.key,
@@ -1201,3 +1258,183 @@ export const addExpense = (expense) => ({
 
 DONC NOTRE CALL DU THINK VERS L ACTION USUEL , ET ON DOIT CHANGER LE NOM DE L ACTION APPELE DANS REACT
 PASSER DE addExpense A startAddExpense :
+
+
+
+///////////////////////////////////////////////////////////////////////////////////////////////
+                              ///FAIRE UN DOUBLE DE NOTRE DB POUR TEST /////
+///////////////////////////////////////////////////////////////////////////////////////////////
+
+process.env.NODE_ENV,  EST MIS A "PRODUCTION" PAR HEROKU PAR DEFAULT ,
+
+CROSS-ENV
+npm install --save cross-env
+
+
+ce package est tres simple ,
+"test": "cross-env NODE_ENV=test ...",
+
+dans le package on dit quel environement on veut quand un script est lancé :
+"start": "cross-env NODE_ENV=production node server/server.js", //ceci n est pas necessaire , heriku sait que start est prod.
+
+
+
+voir Notes -multi serveur
+
+
+///////////////////////////////////////////////////////////////////////////////////////////////
+                              ////Fetcher le data du serveur avec redux ////
+///////////////////////////////////////////////////////////////////////////////////////////////
+
+
+TOUJOURS EN DEUX ETAPES , UNE ACTION RETOURNE UNE FUNCTION
+QUI DISPATCH A UNE AUTRE OPTION QUI RETOURNE UN OBJ
+
+NOTRE DATA EST UN ARRAY D OBJ, DONC ON DOIT RECREER CA:
+1- export const startSetExpenses = () => {
+  return dispatch => {
+    return db
+      .ref('expenses') // donne un then l autre bord
+      .once('value')
+      .then(data => {
+        const expenses = []; //on se creer un array
+        data.forEach(childSnapshot => {
+          //on push pour l array
+          expenses.push({
+            id: childSnapshot.key, //id
+            ...childSnapshot.val() //spread le reste de valeurs
+          });
+        });
+        dispatch(setExpenses(expenses)); //dispatch
+      })
+      .catch(e => {
+        console.log(e);
+      });
+  };
+};
+
+//retourne l array recu
+2-export const setExpenses = (expenses) => ({
+  type: 'SET_EXPENSES',
+  expenses
+});
+
+//reducer
+3-case 'SET_EXPENSES':
+  return action.expenses;
+
+
+PUISQUE QUE CETTE INFO EST NECESSAIRE AU DEPART de l app:
+
+
+ON MONTRE TELECHARGEMENT
+ReactDOM.render(<p>Telechargement...</p>, document.getElementById('app'));
+
+UNE FOIS LE RETOUR DE LA PROMISE , ON MONTRE L APP:
+store.dispatch(startSetExpenses()).then(() => {
+   ReactDOM.render(wrapProvider, document.getElementById('app'));
+   console.log('bravo')
+ });
+
+
+
+
+///////////////////////////////////////////////////////////////////////////////////////////////
+                              ///Comment supprimer /////
+///////////////////////////////////////////////////////////////////////////////////////////////
+
+
+export const removeExpense = (id) => ({
+  type: "REMOVE_EXPENSE",
+  id
+});
+
+
+PLUS SIMPLE PARCE QU AVEC FIREBASE, L- OBJET A LE ID COMME KEY :
+// -KiqNXPFqocG2GJPNPzQ
+//  completed:
+//  createdAt:
+//  text:
+DONC IL D AGIT DE DONNER DONNER L ID ET FAIRE REMOVE :
+
+export const startRemoveExpense = (id) => {
+  return (dispatch) => {
+    db.ref(`expenses/${id}`).remove()
+    .then(() => {
+       return dispatch(removeExpense(id))
+    }).catch((e) => {
+      console.log(e)
+    });
+  };
+}
+
+
+NOTRE APP TROUVAIS L ID SUR props.match.params.id; :
+const mapStateToProps = (state, props) => {
+  return {
+    expense: state.expenses.find(expense => {
+      return expense.id === props.match.params.id;
+    })
+  };
+};
+
+
+ET LE BUTTON :
+<button
+  onClick={() => {
+
+    props.dispatch(startRemoveExpense(props.expense.id));
+    props.history.push('/');
+  }}
+>
+  Retirer
+</button>
+
+
+
+
+///////////////////////////////////////////////////////////////////////////////////////////////
+                              ////Maintenant update ////
+///////////////////////////////////////////////////////////////////////////////////////////////
+
+//THUNK RETOURNE FN ET DISPATCH
+export const startEditExpense = (id, updates) => {
+ return (dispatch) => {
+
+   db.ref(`expenses/${id}`).set({
+     ...updates
+   });
+   dispatch(editExpense(id, updates))
+ };
+
+OU
+ db.ref(`expenses/${id}`).update({
+   ...updates
+ });
+ dispatch(editExpense(id, updates))
+};
+
+};
+
+
+//ACTION RETOURNE L OBJ
+export const editExpense = (id, updates) => ({
+  type: 'EDIT_EXPENSE',
+  id,
+  updates
+});
+
+
+
+//REDUCER
+case "EDIT_EXPENSE":
+//console.log(action.updates)//{amount: 555}
+return state.map((expense) => {
+ if(expense.id === action.id) {
+   return {
+     ...expense, ...action.updates
+   }
+ } else {
+   return expense
+ }
+});

@@ -2524,7 +2524,29 @@ POUR L UTILISATION :
 classname="button button--link"
 
 
+///////////////////////////////////////////////////////////////////////////////////////////////
+                              ///COMMENT METTRE DU INLINE STYLE EN JS/////
+///////////////////////////////////////////////////////////////////////////////////////////////
+POUR UN SEUL :
+const style = {
+  backgroundColor: '#4CAF50', /* Green */
+  border: 'none',
+  color: 'white',
+  padding: '15px 32px',
+  margin: '5px',
+  textAlign: 'center',
+  textDecoration: 'none',
+  display: 'inline-block',
+  fontSize: '16px'
+}
+<NavLink to="/"  style={style}>ACCUEIL</NavLink>
 
+SI ON VEUT EN METTRE 2 , ON DOIT SPREADER NOS OBJ DANS UN OBJ :
+
+const style2 = {
+  backgroundColor: '#838383', /* Green */
+}
+  <button style={{...style , ...style2 }}>LOG OUT</button>
 
 
 ///////////////////////////////////////////////////////////////////////////////////////////////
