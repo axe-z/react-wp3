@@ -1,7 +1,7 @@
 import React, { Component } from "react";
 import ReactDOM from 'react-dom';
 import AppRouter, { history } from './routers/AppRouter';
-
+import LoadingPage from './components/LoadingPage';
 import { Provider  } from 'react-redux'
 
 import configureStore from './store/configureCombineStore'; //store Redux
@@ -24,7 +24,7 @@ const store = configureStore();
 
 let unsubscribe = store.subscribe(() => {
   var state = store.getState();
-  console.log('state ->', state);
+  //console.log('state ->', state);
 });
 
 const wrapProvider = (
@@ -42,11 +42,10 @@ const renderApp = () => {
   }
 };
 
-ReactDOM.render(<p>Telechargement...</p>, document.getElementById('app'));
+ReactDOM.render(<LoadingPage />, document.getElementById('app'));
 
 
-
-
+//
 firebase.auth().onAuthStateChanged((user) => {
  if(user) {
    //console.log(user.uid)
@@ -65,4 +64,4 @@ firebase.auth().onAuthStateChanged((user) => {
  }
 });
 
-//project-395234716581 //firebase m a donné ca , j sais pas c est quoi
+ 

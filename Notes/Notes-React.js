@@ -2436,6 +2436,23 @@ il faut :
 }
 
 
+/************************************ extend ************************************/
+SI ON VEUT LE .SELECT COMME LE INPUT , SANS AVOIR A TOUT COPIER
+
+
+.text-input {
+  border: 1px solid #cacccd;
+  height: 50px;
+  font-size: $font-size-large;
+  font-weight: 300;
+  padding: $s-size;
+}
+
+.select {
+  @extend .text-input;
+}
+
+
 /*****************************  se faire des normes d'espace et couleurs  ********************************/
 
 Dans base/_setting.scss :
@@ -4797,3 +4814,22 @@ ENSUITE PASSER LE JSON , DE FAKE DATA :
 "amount": 0,
 "createdAt": 123
 }
+
+
+
+
+
+///////////////////////////////////////////////////////////////////////////////////////////////
+                              ///AUTHORISER SON DOMAINE SUR FIRASE/////
+///////////////////////////////////////////////////////////////////////////////////////////////
+
+LOCALHOST EST AUTORISÉ PAR DEFAUT :
+AUTH NE FONCTIONNE PAS SU HEROKU PAR CONTRE.
+
+
+Sure le site de firebase :
+1- authentification
+2 - mode de connexion
+3 - Ajouter un domaine
+4- prendre l addresse de l app sur heroku : https://wp3-react-expensify.herokuapp.com
+5- l ajouter

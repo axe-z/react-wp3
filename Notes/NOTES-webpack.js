@@ -536,5 +536,35 @@ plugins: [
 !!!! important !!!!!!
 
   <link rel="stylesheet" href="/styles.css" />  METTRE /REP/TRUC.CSS PAS ./REP/TRUC.CSS , SINON LE CSS FONCTIONNERRA PAS BIEN SI ON RELOAD NON PAS DE LA PAGE PRINCIPALE , MAID AILLEURS DANS L APP
-  
+
 /********************  maniere dite sur npm (pas celle qu on prend mais marche )   ***********************/
+
+
+
+
+///////////////////////////////////////////////////////////////////////////////////////////////
+                              ///Babel polyfill/////
+///////////////////////////////////////////////////////////////////////////////////////////////
+POUR FAIRE EN SORTE DE SUPPORTER DE VIEUX BROWSER AVEC LE CSS
+
+ON PEUT TESTER TOUS LES BROWSER AVEC BROWSERSTACK.COM
+MAINTENANT CA COUTE CHER ...
+
+install:
+npm install --save babel-polyfill
+
+
+
+DANS WEBPACK.CONFIG :
+ON LE PASSE JUSTE AAVANT NOTRE APP.JS , DONC SERA DANS LE BUNDLE.JS
+...
+return {
+  entry: ['babel-polyfill','./src/app.js'],
+  output: {
+    path: path.join(__dirname, 'public', 'dist'),
+    filename: 'bundle.js'
+  },
+
+
+
+MAIUNTENANT LE POLYFILL VA PATCHER LES VIEUX BROWSER
